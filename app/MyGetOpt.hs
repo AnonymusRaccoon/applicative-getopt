@@ -77,18 +77,20 @@ token p = do
     many $ charIf isSpace
     return ret
 
-data Configuration = Configuration {
-    rule :: Int,
-    start :: Maybe Int,
-    lines :: Maybe Int,
-    window :: Maybe Int,
-    move :: Maybe Int
-} deriving Show
 
-defaultConfiguration = Configuration {
-    rule = 0,
-    start = Just 0,
-    Main.lines = Nothing,
-    window = Just 80,
-    move = Just 0
+data Option a = Option {
+    metavar :: String,
+    long :: String,
+    short :: String,
+    parser :: Parser a,
+    defaultValue :: Maybe a,
+    help :: String
 }
+
+newtype Mod a = Mod (Option a -> Option a)
+
+instance Semigroup (Mod (a => Semigroup)) where
+    -- (<>) a -> a -> a
+    (<>) (Mod a) (Mod b) = Mod $ a <> b
+
+-- option :: Parser a -> Mod Option a -> Parser a
