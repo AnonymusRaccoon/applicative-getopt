@@ -61,3 +61,24 @@ int =
         return (-x)
     <|>
         num
+
+maybeInt :: Parser (Maybe Int)
+maybeInt = P $ \str -> case parse int str of
+                          Nothing -> Just (Nothing, str)
+                          Just (y, lo)  -> Just (Just y, lo)
+
+data Configuration = Configuration {
+    rule :: Int,
+    start :: Maybe Int,
+    lines :: Maybe Int,
+    window :: Maybe Int,
+    move :: Maybe Int
+} deriving Show
+
+defaultConfiguration = Configuration {
+    rule = 0,
+    start = Just 0,
+    Main.lines = Nothing,
+    window = Just 80,
+    move = Just 0
+}
