@@ -123,6 +123,7 @@ optionParser _ []
 
 -- TODO Create a type OptionParser witch contains the short & long names & n args parsers.
 -- TODO Pattern match for the OptionParser or a default parser in the runParser. Option parser will check named args while the default one will do positional ones.
+-- EXAMPLE: https://www.paolocapriotti.com/blog/2012/04/27/applicative-option-parser/
 
 runParser :: Parser a -> [String] -> Maybe (a, [String])
 runParser ::
