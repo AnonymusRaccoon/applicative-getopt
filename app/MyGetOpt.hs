@@ -1,28 +1,29 @@
-{-# LANGUAGE DeriveDataTypeable #-}
+import Control.Applicative
 
-import Data.Data
-import Data.Typeable
+newtype Parser a = P (String -> Maybe a)
+
+parse :: Parser a -> String -> Maybe a
+parse (P f) x = f x
+
+instance Functor Parser where
+    -- fmap :: (a -> b) -> f a -> f b
+    fmap map p = P $ \x -> case parse p x of
+                                Nothing -> Nothing
+                                Just y -> Just $ map y
 
 
 data Configuration = Configuration {
-  rule :: Int,
-  start :: Maybe Int,
-  lines :: Maybe Int,
-  window :: Maybe Int,
-  move :: Maybe Int
-} deriving (Show, Data, Typeable)
+    rule :: Int,
+    start :: Maybe Int,
+    lines :: Maybe Int,
+    window :: Maybe Int,
+    move :: Maybe Int
+} deriving Show
 
-argsName :: [String]
-argsName = constrFields . head . dataTypeConstrs  $ dataTypeOf (undefined :: Configuration)
-
-argsType :: [TypeRep]
-argsType = recurse $ typeOf Configuration
-  where recurse x = let (_, y) = splitTyConApp x in
-                    case y of (z:zs:[]) -> z : recurse zs
-                              []        -> []
-
-args :: [(String, TypeRep)]
-args = zip argsName argsType
-
---getOpt :: [String] -> Configuration
---getOpt [] ->
+defaultConfiguration = Configuration {
+    rule = 0,
+    start = Just 0,
+    Main.lines = Nothing,
+    window = Just 80,
+    move = Just 0
+}
