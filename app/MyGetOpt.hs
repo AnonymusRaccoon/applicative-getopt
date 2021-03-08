@@ -1,4 +1,5 @@
 import Control.Applicative
+import Data.Char
 
 newtype Parser a = P { parse :: (String -> Maybe (a, String)) }
 
@@ -13,74 +14,50 @@ instance Applicative Parser where
     pure x = P (\lo -> Just (x, lo))
 
     -- (<*>) :: f (a -> b) -> f a -> f b
-    (<*>) f p = P $ \x -> case parse f x of
-                               Nothing -> Nothing
-                               Just (y, lo) -> parse (fmap y p) lo
+    (<*>) (P f) (P p) = P $ \str -> do
+        (f, lo) <- f str
+        (v, lo1) <- p lo
+        return (f v, lo1)
 
 instance Monad Parser where
     -- (>>=) :: forall a b. m a -> (a -> m b) -> m b
-    (>>=) p f = P $ \x -> case parse p x of
+    (>>=) p f = P $ \str -> case parse p str of
                                Nothing -> Nothing
                                Just (y, lo) -> parse (f y) lo
 
 instance Alternative Parser where
     -- empty :: f a
-    empty = P (\x -> Nothing)
+    empty = P (\_ -> Nothing)
 
     -- (<|>) :: f a -> f a -> f a
     (<|>) a b = P $ \x -> case parse a x of
                                Nothing -> parse b x
                                y -> y
 
-data Configuration = Configuration {
-    rule :: Int,
-    start :: Maybe Int,
-    lines :: Maybe Int,
-    window :: Maybe Int,
-    move :: Maybe Int
-} deriving Show
 
-defaultConfiguration = Configuration {
-    rule = 0,
-    start = Just 0,
-    Main.lines = Nothing,
-    window = Just 80,
-    move = Just 0
-}
+char :: Parser Char
+char = P $ \x -> case x of
+                      [] -> Nothing
+                      (x:xs) -> Just (x, xs)
 
---
---data PeutEtre a = Juste a | Rien
---
---instance Functor PeutEtre where
---    -- fmap :: (a -> b) -> f a -> f b
---    fmap _ Rien = Rien
---    fmap f (Juste x) = Juste $ f x
---
---instance Applicative PeutEtre where
---    -- pure :: a -> f a
---    pure x = Juste x
---
---    -- (<*>) :: f (a -> b) -> f a -> f b
---    (<*>) _ Rien = Rien
---    (<*>) Rien _ = Rien
---    (<*>) (Juste f) (Juste x) = Juste $ f x
---
---instance Semigroup PeutEtre where
---    -- (<>) :: a -> a -> a
---    (<>) Rien x = x
---    (<>) x _ = x
---    (<>) Rien Rien = Rien
---
---instance Monad PeutEtre where
---    -- (>>=) :: forall a b. m a -> (a -> m b) -> m b
---    (>>=) Rien _ = Rien
---    (>>=) (Juste x) f = f x
---
---instance Alternative PeutEtre where
---    -- empty :: f a
---    empty = Rien
---
---    -- (<|>) :: f a -> f a -> f a
---    (<|>) (Juste a) _ = Juste a
---    (<|>) _ (Juste a) = Juste a
---    (<|>) _ _ = Rien
+charIf :: (Char -> Bool) -> Parser Char
+charIf f = do
+    x <- char
+    if f x then return x else empty
+
+digit :: Parser Char
+digit = charIf isDigit
+
+num :: Parser Int
+num = do
+    x <- some digit
+    return $ read x
+
+int :: Parser Int
+int =
+    do
+        charIf $ \x -> x == '-'
+        x <- num
+        return (-x)
+    <|>
+        num
