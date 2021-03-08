@@ -1,9 +1,15 @@
 module Main where
 
 import Lib
+import MyGetOpt
 
 main :: IO ()
-main = someFunc
+main = print option
+             (  long "rule"
+             <> short "r"
+             <> metavar "RULE"
+             <> help "The rulset used."
+             )
 
 
 data Configuration = Configuration {
@@ -14,14 +20,14 @@ data Configuration = Configuration {
     move :: Maybe Int
 } deriving Show
 
-config :: Parser Configuration
-config :: Config
-    <$> option
-        (  long "rule"
-        <> short "r"
-        <> metavar "RULE"
-        <> help "The rulset used."
-        )
+--config :: Parser Configuration
+--config = Configuration
+--    <$> option
+--        (  long "rule"
+--        <> short "r"
+--        <> metavar "RULE"
+--        <> help "The rulset used."
+--        )
 
 
 --defaultConfiguration = Configuration {
