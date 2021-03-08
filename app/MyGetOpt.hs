@@ -45,6 +45,9 @@ charIf f = do
     x <- char
     if f x then return x else empty
 
+alphaNum :: Parser Char
+alphaNum = charIf isAlphaNum
+
 digit :: Parser Char
 digit = charIf isDigit
 
@@ -66,6 +69,13 @@ maybeInt :: Parser (Maybe Int)
 maybeInt = P $ \str -> case parse int str of
                           Nothing -> Just (Nothing, str)
                           Just (y, lo)  -> Just (Just y, lo)
+
+token :: Parser a -> Parser a
+token p = do
+    many $ charIf isSpace
+    ret <- p
+    many $ charIf isSpace
+    return ret
 
 data Configuration = Configuration {
     rule :: Int,
