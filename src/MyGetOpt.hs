@@ -85,9 +85,9 @@ data Option a = Option {
     longName :: String,
     shortName :: Char,
     defaultValue :: Maybe a,
-    helpMessage :: String--,
-    --parser :: Parser a
-} deriving Show
+    helpMessage :: String,
+    parser :: Parser a
+}
 
 meta :: String -> Mod a
 meta v = Mod $ \x -> x { metavar = v }
@@ -111,7 +111,18 @@ instance Semigroup (Mod a) where
     -- (<>) a -> a -> a
     (<>) (Mod a) (Mod b) = Mod (a . b)
 
-option :: Parser Int -> Mod Int -> IO() --Parser a
-option p (Mod m) = print $ m def
+-- If need to compile, comment everything bellow.
+option :: Parser Int -> Mod Int -> Parser a
+option p (Mod m) = optionParser (m $ def p)
     where
-        def = Option "VAR" "" ' ' (Nothing :: Maybe Int) "No help message set."
+        def = Option "VAR" "" ' ' Nothing "No help message set."
+
+optionParser :: Option a -> Parser a
+optionParser _ []
+
+
+-- TODO Create a type OptionParser witch contains the short & long names & n args parsers.
+-- TODO Pattern match for the OptionParser or a default parser in the runParser. Option parser will check named args while the default one will do positional ones.
+
+runParser :: Parser a -> [String] -> Maybe (a, [String])
+runParser ::
