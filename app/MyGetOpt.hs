@@ -1,16 +1,30 @@
 import Control.Applicative
 
-newtype Parser a = P (String -> Maybe a)
-
-parse :: Parser a -> String -> Maybe a
-parse (P f) x = f x
+newtype Parser a = P { parse :: (String -> Maybe (a, String)) }
 
 instance Functor Parser where
     -- fmap :: (a -> b) -> f a -> f b
-    fmap map p = P $ \x -> case parse p x of
-                                Nothing -> Nothing
-                                Just y -> Just $ map y
+    fmap f p = P $ \x -> case parse p x of
+                              Nothing -> Nothing
+                              Just (y, lo) -> Just $ (f y, lo)
 
+instance Applicative Parser where
+    -- pure :: a -> f a
+    pure x = P (\lo -> Just (x, lo))
+
+    -- (<*>) :: f (a -> b) -> f a -> f b
+    (<*>) f p = P $ \x -> case parse f x of
+                               Nothing -> Nothing
+                               Just (y, lo) -> parse (fmap y p) lo
+
+instance Alternative Parser where
+    -- empty :: f a
+    empty = P (\x -> Nothing)
+
+    -- (<|>) :: f a -> f a -> f a
+  --  (<|>) a b = P $ \x -> case parse a x of
+    --                           Nothing -> b
+      --                         _ -> a
 
 data Configuration = Configuration {
     rule :: Int,
