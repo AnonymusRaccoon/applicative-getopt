@@ -18,11 +18,22 @@ rule30 Empty Full  Empty = Full
 rule30 Empty Empty Full  = Full
 rule30 _     _     _     = Empty
 
+rule90 :: CellGen
+rule90 x _ y = if x == y then Empty else Full
+
+rule110 :: CellGen
+rule110 Full  Full  Empty = Full
+rule110 Full  Empty Full  = Full
+rule110 Empty Full  Full  = Full
+rule110 Empty Full  Empty = Full
+rule110 Empty Empty Full  = Full
+rule110 _     _     _     = Empty
+
 getrule :: Int -> CellGen
 getrule 30 = rule30
+getrule 90 = rule90
+getrule 110 = rule110
 getrule r = error $ "Unsupported rule" ++ (show r)
---getrule  90 = rule90
---getrule 110 = rule110
 
 generate :: Int -> [CellList]
 generate ri = iterate gen [Full]
@@ -41,13 +52,8 @@ generate ri = iterate gen [Full]
 
 printCells :: Configuration -> [CellList] -> IO()
 printCells _ [] = putChar '\n'
-printCells config (x:xs) = plist x >> printCells config xs
+printCells config (x:xs) = pl x >> printCells config xs
     where
-        plist :: CellList -> IO()
-        plist = pl
-        -- plist cl
-        --     | length cl < 
-        
         pl :: CellList -> IO()
         pl [] = putChar '\n'
         pl (y:ys) = putChar (toChar y) >> pl ys
@@ -90,7 +96,7 @@ main = case getConfig of
 
 
 getConfig :: Maybe Configuration
-getConfig = Just $ Configuration 30 0 (Just 20) 80 0
+getConfig = Just $ Configuration 90 0 (Just 20) 80 0
 
 
 data Configuration = Configuration {
