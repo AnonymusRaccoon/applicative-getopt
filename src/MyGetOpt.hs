@@ -3,7 +3,7 @@ module MyGetOpt where
 import Control.Applicative
 import Data.Char
 
-newtype Parser a = Parser { parse :: (String -> Maybe (a, String)) }
+newtype Parser a = Parser { parse :: String -> Maybe (a, String) }
 
 instance Functor Parser where
     -- fmap :: (a -> b) -> f a -> f b
@@ -29,7 +29,7 @@ instance Monad Parser where
 
 instance Alternative Parser where
     -- empty :: f a
-    empty = Parser (\_ -> Nothing)
+    empty = Parser $ const Nothing
 
     -- (<|>) :: f a -> f a -> f a
     (<|>) a b = Parser $ \x -> case parse a x of
