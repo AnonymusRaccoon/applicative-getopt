@@ -1,5 +1,6 @@
 module Main where
 
+import System.Exit (exitWith, ExitCode (ExitFailure))
 --import MyGetOpt
 
 data Cell = Empty | Full 
@@ -45,20 +46,16 @@ printCells config (x:xs) = pl x >> printCells config xs
 
 main :: IO ()
 main = case getConfig of 
-            Nothing -> exitFailure(ExitCode 84)
-            Just config -> runAndPrint config
+            Nothing -> exitWith (ExitFailure 84)
+            Just config -> printCells config (post config . run $ rule config)
     where
-        runAndPrint :: Configuration -> IO()
-        runAndPrint config = printCells config (post . run (rule config))
+        post :: Configuration -> [CellList] -> [CellList]
+        post config = runMaybe (start config) drop 
+                    . runMaybe (Main.lines config) take
 
-        post :: [CellList] -> [CellList]
-        post = skipX (start config) . takeX ()
-
-    let cells = run (rule config)
-    let fcells = case Main.lines config of
-                  Nothing -> cells
-                  Just x  -> take x cells
-    printCells config fcells
+        runMaybe :: Maybe a -> (a -> b -> b) -> b -> b
+        runMaybe Nothing _ v = v
+        runMaybe (Just n) f v = f n v
 --    print option
 --             (  long "rule"
 --             <> short "r"
@@ -67,7 +64,7 @@ main = case getConfig of
 --             )
 
 getConfig :: Maybe Configuration
-getConfig = Just Configuration 30 (Just 0) (Just 10) (Just 80) (Just 0)
+getConfig = Just $ Configuration 30 (Just 0) (Just 10) (Just 80) (Just 0)
 
 
 data Configuration = Configuration {
