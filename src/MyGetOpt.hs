@@ -111,19 +111,19 @@ instance Semigroup (Mod a) where
     -- (<>) a -> a -> a
     (<>) (Mod a) (Mod b) = Mod (a . b)
 
--- If need to compile, comment everything bellow.
-option :: Parser Int -> Mod Int -> Parser a
-option p (Mod m) = optionParser (m $ def p)
-    where
-        def = Option "VAR" "" ' ' Nothing "No help message set."
-
-optionParser :: Option a -> Parser a
-optionParser _ []
-
-
--- TODO Create a type OptionParser witch contains the short & long names & n args parsers.
--- TODO Pattern match for the OptionParser or a default parser in the runParser. Option parser will check named args while the default one will do positional ones.
--- EXAMPLE: https://www.paolocapriotti.com/blog/2012/04/27/applicative-option-parser/
-
-runParser :: Parser a -> [String] -> Maybe (a, [String])
-runParser ::
+---- If need to compile, comment everything bellow.
+--option :: Parser Int -> Mod Int -> Parser a
+--option p (Mod m) = optionParser (m $ def p)
+--    where
+--        def = Option "VAR" "" ' ' Nothing "No help message set."
+--
+--optionParser :: Option a -> Parser a
+--optionParser _ []
+--
+--
+---- TODO Create a type OptionParser witch contains the short & long names & n args parsers.
+---- TODO Pattern match for the OptionParser or a default parser in the runParser. Option parser will check named args while the default one will do positional ones.
+---- EXAMPLE: https://www.paolocapriotti.com/blog/2012/04/27/applicative-option-parser/
+--
+--runParser :: Parser a -> [String] -> Maybe (a, [String])
+--runParser ::

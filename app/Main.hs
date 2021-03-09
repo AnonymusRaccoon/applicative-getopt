@@ -3,13 +3,28 @@ module Main where
 import Lib
 import MyGetOpt
 
+data Cell = Empty | Full
+newType CellList = CellList { left :: [], middle :: [], right :: [] }
+
+run :: Int -> [CellList]
+run _ = []
+
+printCells :: Configuration -> [CellList] -> IO()
+printCells _ [] = return
+printCells config (x:xs) = pl x >> printCells config xs
+    where
+        pl cl =
+
 main :: IO ()
-main = print option
-             (  long "rule"
-             <> short "r"
-             <> metavar "RULE"
-             <> help "The rulset used."
-             )
+main = do
+    config = Configuration 30 0 10 80 0
+    printCells config $ run (rule config)
+--    print option
+--             (  long "rule"
+--             <> short "r"
+--             <> metavar "RULE"
+--             <> help "The rulset used."
+--             )
 
 
 data Configuration = Configuration {
