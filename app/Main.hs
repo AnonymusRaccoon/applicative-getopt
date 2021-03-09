@@ -3,10 +3,13 @@ module Main where
 import System.Exit (exitWith, ExitCode (ExitFailure))
 --import MyGetOpt
 
-data Cell = Empty | Full 
+data Cell = Empty | Full | Pad
     deriving (Read, Show, Eq, Ord, Enum, Bounded)
+
 type CellList = [Cell]
+
 type CellGen = Cell -> Cell -> Cell -> Cell
+
 
 rule30 :: Cell -> Cell -> Cell -> Cell
 rule30 Full  Empty Empty = Full
@@ -21,15 +24,15 @@ getrule r = error $ "Unsupported rule" ++ (show r)
 --getrule  90 = rule90
 --getrule 110 = rule110
 
-run :: Int -> [CellList]
-run ri = iterate generate [Full]
+generate :: Int -> [CellList]
+generate ri = iterate gen [Full]
     where
         r = getrule ri
-        
-        generate :: CellList -> CellList
-        generate [] = []
-        generate (x:[]) = r Empty Empty x : r Empty x Empty : r x Empty Empty : []
-        generate (x:y:xs) = r Empty Empty x : r Empty x y : endgen (x:y:xs)
+
+        gen :: CellList -> CellList
+        gen [] = []
+        gen (x:[]) = r Empty Empty x : r Empty x Empty : r x Empty Empty : []
+        gen (x:y:xs) = r Empty Empty x : r Empty x y : endgen (x:y:xs)
 
         endgen :: CellList -> CellList
         endgen (x:y:z:xs) = r x y z : endgen (y:z:xs)
@@ -38,41 +41,64 @@ run ri = iterate generate [Full]
 
 printCells :: Configuration -> [CellList] -> IO()
 printCells _ [] = putChar '\n'
-printCells config (x:xs) = pl x >> printCells config xs
+printCells config (x:xs) = plist x >> printCells config xs
     where
+        plist :: CellList -> IO()
+        plist = pl
+        -- plist cl
+        --     | length cl < 
+        
         pl :: CellList -> IO()
         pl [] = putChar '\n'
-        pl (y:ys) = putChar (if y == Empty then ' ' else '*') >> pl ys
+        pl (y:ys) = putChar (toChar y) >> pl ys
+
+        toChar :: Cell -> Char
+        toChar Empty = ' '
+        toChar Pad = ' '
+        toChar Full = '*'
 
 main :: IO ()
 main = case getConfig of 
             Nothing -> exitWith (ExitFailure 84)
-            Just config -> printCells config (post config . run $ rule config)
+            Just config -> printCells config (post config . generate $ rule config)
     where
         post :: Configuration -> [CellList] -> [CellList]
-        post config = runMaybe (start config) drop 
+        post config = drop (start config)
                     . runMaybe (Main.lines config) take
+                    . map (rotate $ move config)
+                    . map (align $ window config)
 
         runMaybe :: Maybe a -> (a -> b -> b) -> b -> b
         runMaybe Nothing _ v = v
         runMaybe (Just n) f v = f n v
---    print option
---             (  long "rule"
---             <> short "r"
---             <> metavar "RULE"
---             <> help "The rulset used."
---             )
+        
+        align :: Int -> CellList -> CellList
+        align win cl
+            | len <= win = pad <> cl <> pad
+            | otherwise  = take win . drop (len `div` 2 - win `div` 2) $ cl
+            where
+                len = length cl
+                pad = replicate ((win - len) `div` 2) Pad
+        
+        rotate :: Int -> [a] -> [a]
+        rotate _ [] = []
+        rotate _ [x] = [x]
+        rotate 0 xs = xs
+        rotate n xs
+            |  n < 0 = reverse (rotate (n * (-1)) (reverse xs))
+            |  otherwise = zipWith const (drop n (cycle xs)) xs
+
 
 getConfig :: Maybe Configuration
-getConfig = Just $ Configuration 30 (Just 0) (Just 10) (Just 80) (Just 0)
+getConfig = Just $ Configuration 30 0 (Just 20) 80 0
 
 
 data Configuration = Configuration {
     rule :: Int,
-    start :: Maybe Int,
+    start :: Int,
     lines :: Maybe Int,
-    window :: Maybe Int,
-    move :: Maybe Int
+    window :: Int,
+    move :: Int
 } deriving Show
 
 --config :: Parser Configuration
