@@ -1,14 +1,7 @@
-{-# LANGUAGE GADTs #-}
 module GetOpt.Data (
-    Parser(DefParser, OptParser),
     OptionParser,
     Option(..)
 ) where
-
-
-data Parser a where 
-    DefParser :: a -> Parser a
-    OptParser :: Option (a -> b) -> Parser a -> Parser b
 
 type OptionParser a = (String -> Maybe a)
 
@@ -20,3 +13,7 @@ data Option a = Option {
     helpMessage :: String,
     parser :: OptionParser a
 }
+
+instance Functor Option where
+    -- fmap :: (a -> b) -> f a -> f b
+    fmap f (Option mv l s dv hm p) = Option mv l s (fmap f dv) hm (fmap f . p)

@@ -1,10 +1,7 @@
 module GetOpt.Options where
 
-import GetOpt.Data(Option(..), OptionParser, Parser(..))
-
-instance Functor Option where
-    -- fmap :: (a -> b) -> f a -> f b
-    fmap f (Option mv l s dv hm p) = Option mv l s (fmap f dv) hm (fmap f . p)
+import GetOpt.Data(Option(..), OptionParser)
+import GetOpt.Parsers
 
 meta :: String -> Mod a
 meta v = Mod $ \x -> x { metavar = v }
@@ -36,3 +33,9 @@ option p (Mod m) = OptParser (fmap const (m $ def p)) (DefParser ())
 optionMatch :: Option a -> String -> Bool
 optionMatch opt [d, s] = d == '-' && s == shortName opt
 optionMatch opt (d:d1:l) = d == '-' && d1 ==  '-' && l == longName opt
+optionMatch _ _ = False
+
+auto :: Read a => OptionParser a
+auto str = case reads str of
+                [(v, "")] -> Just v
+                _         -> Nothing
