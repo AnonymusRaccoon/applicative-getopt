@@ -12,3 +12,11 @@ instance Functor Parser where
     fmap f (DefParser a) = DefParser $ f a
     fmap f (OptParser opt next) = OptParser (fmap (f .) opt) next
 
+instance Applicative Parser where
+    -- pure a -> f a
+    pure a = DefParser a
+
+    -- (<*>) f (a -> b) -> f a -> f b
+    (<*>) (DefParser f) p = fmap f p
+    -- (<*>) (OptParser (Option (a -> b -> c)) Parser (a -> b)) -> Parser a -> Parser c
+    (<*>) (OptParser f next) p = OptParser () next

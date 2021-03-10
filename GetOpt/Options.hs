@@ -1,7 +1,7 @@
 module GetOpt.Options where
 
-import GetOpt.Data(Option(..), OptionParser)
-import GetOpt.Parsers
+import GetOpt.Data( Option(..), OptionParser )
+import GetOpt.Parsers ( Parser(..) )
 
 meta :: String -> Mod a
 meta v = Mod $ \x -> x { metavar = v }

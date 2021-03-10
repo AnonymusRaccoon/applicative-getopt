@@ -17,19 +17,19 @@ getParser = Configuration
             <> meta "RULE"
             <> help "The rulset used." 
          )
-        --  <*> option (
-        --        long "start"
-        --     <> short 's'
-        --     <> meta "START"
-        --     <> help "At witch line should we start"
-        --     <> value 0
-        --  )
+         <*> option auto (
+               long "start"
+            <> short 's'
+            <> meta "START"
+            <> help "At witch line should we start"
+            <> value 0
+         )
 
 
 
 data Configuration = Configuration {
-    rule :: Int 
-    -- start :: Int,
+    rule :: Int,
+    start :: Int
     -- lines :: Maybe Int,
     -- window :: Int,
     -- move :: Int
