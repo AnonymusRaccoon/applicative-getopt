@@ -1,5 +1,7 @@
 module Main where
 
+import System.Environment (getArgs)
+import Text.Read
 import System.Exit (exitWith, ExitCode (ExitFailure))
 --import MyGetOpt
 
@@ -64,9 +66,11 @@ printCells config (x:xs) = pl x >> printCells config xs
         toChar Full = '*'
 
 main :: IO ()
-main = case getConfig of 
-            Nothing -> exitWith (ExitFailure 84)
-            Just config -> printCells config (post config . generate $ rule config)
+main = do
+    args <- getArgs
+    case getOpt args defaultConfiguration of 
+         (Just config) -> printCells config (post config . generate $ rule config)
+         Nothing       -> exitWith (ExitFailure 84)
     where
         post :: Configuration -> [CellList] -> [CellList]
         post config = drop (start config)
@@ -95,8 +99,14 @@ main = case getConfig of
             |  otherwise = zipWith const (drop n (cycle xs)) xs
 
 
-getConfig :: Maybe Configuration
-getConfig = Just $ Configuration 90 0 (Just 20) 80 0
+getOpt :: [String] -> Configuration -> Maybe Configuration
+getOpt [] conf = Just conf
+getOpt ("--rule":x:xs) c = readMaybe x >>= \arg -> getOpt xs c{ rule = arg }
+getOpt ("--start":x:xs) c = readMaybe x >>= \arg -> getOpt xs c{ start = arg }
+getOpt ("--lines":x:xs) c = readMaybe x >>= \arg -> getOpt xs c{ Main.lines = Just arg }
+getOpt ("--window":x:xs) c = readMaybe x >>= \arg -> getOpt xs c{ window = arg }
+getOpt ("--move":x:xs) c = readMaybe x >>= \arg -> getOpt xs c{ move = arg }
+getOpt _ _ = Nothing
 
 
 data Configuration = Configuration {
@@ -107,20 +117,12 @@ data Configuration = Configuration {
     move :: Int
 } deriving Show
 
---config :: Parser Configuration
---config = Configuration
---    <$> option
---        (  long "rule"
---        <> short "r"
---        <> metavar "RULE"
---        <> help "The rulset used."
---        )
 
-
---defaultConfiguration = Configuration {
---    rule = 0,
---    start = Just 0,
---    Main.lines = Nothing,
---    window = Just 80,
---    move = Just 0
---}
+defaultConfiguration :: Configuration
+defaultConfiguration = Configuration {
+   rule = 0,
+   start = 0,
+   Main.lines = Nothing,
+   window = 80,
+   move = 0
+}
