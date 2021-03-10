@@ -32,3 +32,7 @@ option :: OptionParser a -> Mod a -> Parser a
 option p (Mod m) = OptParser (fmap const (m $ def p)) (DefParser ())
    where
        def = Option "VAR" "" ' ' Nothing "No help message set."
+
+optionMatch :: Option a -> String -> Bool
+optionMatch opt [d, s] = d == '-' && s == shortName opt
+optionMatch opt (d:d1:l) = d == '-' && d1 ==  '-' && l == longName opt

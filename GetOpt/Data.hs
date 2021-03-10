@@ -10,8 +10,6 @@ data Parser a where
     DefParser :: a -> Parser a
     OptParser :: Option (a -> b) -> Parser a -> Parser b
 
--- newtype OptionParser a = OptionParser { parse :: String -> Maybe a }
-
 type OptionParser a = (String -> Maybe a)
 
 data Option a = Option {
