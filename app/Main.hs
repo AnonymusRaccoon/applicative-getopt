@@ -73,9 +73,9 @@ main = do
          Nothing       -> exitWith (ExitFailure 84)
     where
         post :: Configuration -> [CellList] -> [CellList]
-        post config = drop (start config)
-                    . runMaybe (Main.lines config) take
-                    . map (rotate $ move config)
+        post config = runMaybe (Main.lines config) take
+                    . drop (start config) 
+                    . map (rotate $ -move config)
                     . map (align $ window config)
 
         runMaybe :: Maybe a -> (a -> b -> b) -> b -> b
