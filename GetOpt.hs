@@ -22,7 +22,7 @@ getOpt p args = case runParser p args of
                      Nothing          -> Nothing
 
 runParser :: Parser a -> [String] -> Maybe (Parser a, [String])
-runParser p@(DefParser _) args = Just (p, args)
+runParser p@(DefParser _) args = Nothing
 runParser (OptParser _ _) [] = Nothing
 runParser (OptParser _ _) [_] = Nothing -- TODO remove this and support default values
 runParser (OptParser opt next) (identifier:arg:args)
@@ -30,5 +30,5 @@ runParser (OptParser opt next) (identifier:arg:args)
         ret <- parser opt arg
         return (fmap ret next, args)
     | otherwise                  = do
-        (nextP, newArgs) <- runParser next (identifier:args)
+        (nextP, newArgs) <- runParser next (identifier:arg:args)
         return (OptParser opt nextP, newArgs)
