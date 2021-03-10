@@ -1,5 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
-module MyGetOpt where
+module OldGetOpt where
 
 import Control.Applicative ( Alternative(..) )
 import Data.Char ( isSpace, isDigit, isAlphaNum )
@@ -80,43 +80,6 @@ token p = do
     ret <- p
     many $ charIf isSpace
     return ret
-
-
-data Option a = Option {
-    metavar :: String,
-    longName :: String,
-    shortName :: Char,
-    defaultValue :: Maybe a,
-    helpMessage :: String,
-    parser :: Parser a
-}
-
-meta :: String -> Mod a
-meta v = Mod $ \x -> x { metavar = v }
-
-long :: String -> Mod a
-long v = Mod $ \x -> x { longName = v }
-
-short :: Char -> Mod a
-short v = Mod $ \x -> x { shortName = v }
-
-value :: a -> Mod a
-value v = Mod $ \x -> x { defaultValue = Just v }
-
-help :: String -> Mod a
-help v = Mod $ \x -> x { helpMessage = v }
-
-
-newtype Mod a = Mod (Option a -> Option a)
-
-instance Semigroup (Mod a) where
-    -- (<>) a -> a -> a
-    (<>) (Mod a) (Mod b) = Mod (a . b)
-
-option :: Parser a -> Mod a -> Parser a
-option p (Mod m) = OptParser (m $ def p)
-   where
-       def = Option "VAR" "" ' ' Nothing "No help message set."
 
 -- TODO Create a type OptionParser witch contains the short & long names & n args parsers.
 -- TODO Pattern match for the OptionParser or a default parser in the runParser. Option parser will check named args while the default one will do positional ones.
