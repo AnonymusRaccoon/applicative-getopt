@@ -17,6 +17,7 @@ instance Applicative Parser where
     pure a = DefParser a
 
     -- (<*>) f (a -> b) -> f a -> f b
-    (<*>) (DefParser f) p = fmap f p
+    (<*>) (DefParser f) p = f <$> p
     -- (<*>) (OptParser (Option (a -> b -> c)) Parser (a -> b)) -> Parser a -> Parser c
-    (<*>) (OptParser f next) p = OptParser () next
+    -- Ret: OptParser (Option ((a, b) -> c)) (Parser (a, b)) :: Parser (a, b)
+    (<*>) (OptParser f next) p = OptParser (uncurry <$> f) (fmap (,) next <*> p)

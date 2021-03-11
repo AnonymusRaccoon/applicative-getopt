@@ -23,7 +23,9 @@ getOpt p args = case runParser p args of
 
 runParser :: Parser a -> [String] -> Maybe (Parser a, [String])
 runParser p@(DefParser _) args = Nothing
-runParser (OptParser _ _) [] = Nothing
+runParser (OptParser opt next) [] = do
+    def <- defaultValue opt
+    return (fmap def next, [])
 runParser (OptParser _ _) [_] = Nothing -- TODO remove this and support default values
 runParser (OptParser opt next) (identifier:arg:args)
     | optionMatch opt identifier = do
