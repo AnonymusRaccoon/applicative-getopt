@@ -7,6 +7,7 @@ module GetOpt (
     GetOpt.Options.short,
     GetOpt.Options.value,
     GetOpt.Options.meta,
+    GetOpt.Options.unset,
     GetOpt.Options.option,
     GetOpt.Options.auto,
 ) where
@@ -26,11 +27,23 @@ runParser p@(DefParser _) args = Nothing
 runParser (OptParser opt next) [] = do
     def <- defaultValue opt
     return (fmap def next, [])
-runParser (OptParser _ _) [_] = Nothing -- TODO remove this and support default values
-runParser (OptParser opt next) (identifier:arg:args)
+runParser (OptParser opt next) (identifier:args)
     | optionMatch opt identifier = do
-        ret <- parser opt arg
-        return (fmap ret next, args)
-    | otherwise                  = do
-        (nextP, newArgs) <- runParser next (identifier:arg:args)
+        (ret, lo) <- getArg opt args
+        return (fmap ret next, lo)
+    | otherwise = do
+        (nextP, newArgs) <- runParser next (identifier:args)
         return (OptParser opt nextP, newArgs)
+    
+    where
+        getArg :: Option a -> [String] -> Maybe (a, [String])
+        getArg opt (arg:args)
+            | head arg /= '-' = do 
+                ret <- parser opt arg
+                return (ret, args)
+            | otherwise = do
+                ret <- unsetValue opt
+                return (ret, arg:args)
+        getArg opt args = do
+            ret <- unsetValue opt
+            return (ret, args)

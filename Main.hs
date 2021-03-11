@@ -15,7 +15,8 @@ getParser = Configuration
                long "rule"
             <> short 'r'
             <> meta "RULE"
-            <> help "The rulset used." 
+            <> help "The rulset used."
+            <> unset 30
          )
          <*> option auto (
                long "start"

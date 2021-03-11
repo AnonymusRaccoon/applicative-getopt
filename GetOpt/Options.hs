@@ -18,6 +18,9 @@ value v = Mod $ \x -> x { defaultValue = Just v }
 help :: String -> Mod a
 help v = Mod $ \x -> x { helpMessage = v }
 
+unset :: a -> Mod a
+unset v = Mod $ \x -> x { unsetValue = Just v } 
+
 
 newtype Mod a = Mod (Option a -> Option a)
 
@@ -28,7 +31,7 @@ instance Semigroup (Mod a) where
 option :: OptionParser a -> Mod a -> Parser a
 option p (Mod m) = OptParser (fmap const (m $ def p)) (DefParser ())
    where
-       def = Option "VAR" "" ' ' Nothing "No help message set."
+       def = Option "VAR" "" ' ' Nothing "No help message set." Nothing
 
 optionMatch :: Option a -> String -> Bool
 optionMatch opt [d, s] = d == '-' && s == shortName opt

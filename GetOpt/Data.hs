@@ -11,9 +11,11 @@ data Option a = Option {
     shortName :: Char,
     defaultValue :: Maybe a,
     helpMessage :: String,
+    unsetValue :: Maybe a,
     parser :: OptionParser a
 }
 
 instance Functor Option where
     -- fmap :: (a -> b) -> f a -> f b
-    fmap f (Option mv l s dv hm p) = Option mv l s (fmap f dv) hm (fmap f . p)
+    fmap f (Option mv l s dv hm sv p) 
+        = Option mv l s (fmap f dv) hm (fmap f sv) (fmap f . p)
