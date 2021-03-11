@@ -16,6 +16,8 @@ import GetOpt.Data
 import GetOpt.Options
 import GetOpt.Parsers
 
+import Data.Maybe (isNothing)
+
 getOpt :: Parser a -> [String] -> Maybe (a, [String])
 getOpt (DefParser a) args = Just (a, args)
 getOpt p args = case runParser p args of
@@ -42,7 +44,7 @@ runParser p@(OptParser opt next) (identifier:args)
     where
         getArg :: Option a -> [String] -> Maybe (a, [String])
         getArg opt (arg:args)
-            | head arg /= '-' = do 
+            | head arg /= '-' || isNothing (unsetValue opt) = do 
                 ret <- parser opt arg
                 return (ret, args)
             | otherwise = do
